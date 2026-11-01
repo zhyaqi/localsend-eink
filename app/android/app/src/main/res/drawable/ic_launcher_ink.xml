@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- E-ink launcher icon: fixed rounded square, independent of the device launcher mask. -->
+    <path
+        android:fillColor="#000000"
+        android:pathData="M25,7 H83 C92.94,7 101,15.06 101,25 V83 C101,92.94 92.94,101 83,101 H25 C15.06,101 7,92.94 7,83 V25 C7,15.06 15.06,7 25,7 Z" />
+    <group
+        android:scaleX="0.078"
+        android:scaleY="0.078"
+        android:translateX="14.08"
+        android:translateY="14.08">
+        <path
+            android:fillColor="#00000000"
+            android:pathData="M512,512m-287,0a287,287 0,1 1,574 0a287,287 0,1 1,-574 0"
+            android:strokeColor="#FFFFFF"
+            android:strokeLineCap="round"
+            android:strokeWidth="50" />
+        <path
+            android:fillColor="#00000000"
+            android:pathData="M512,512m-185,0a185,185 0,1 1,370 0a185,185 0,1 1,-370 0"
+            android:strokeColor="#FFFFFF"
+            android:strokeLineCap="round"
+            android:strokeWidth="50" />
+        <path
+            android:fillColor="#FFFFFF"
+            android:pathData="M512,512m-100,0a100,100 0,1 1,200 0a100,100 0,1 1,-200 0" />
+    </group>
+</vector>

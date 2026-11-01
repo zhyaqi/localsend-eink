@@ -48,8 +48,7 @@ class LocalSendApp extends StatelessWidget {
     final ref = context.ref;
     final (themeMode, colorMode, customColor) = ref.watch(
       settingsProvider.select(
-        (settings) =>
-            (settings.theme, settings.colorMode, settings.customColor),
+        (settings) => (settings.theme, settings.colorMode, settings.customColor),
       ),
     );
     final dynamicColors = ref.watch(dynamicColorsProvider);
@@ -71,17 +70,13 @@ class LocalSendApp extends StatelessWidget {
                 }
                 if (checkPlatform([TargetPlatform.iOS])) {
                   // The multicast sockets die the same silent way but cannot be probed, so always rebind them.
-                  ref
-                      .redux(parentIsolateProvider)
-                      .dispatch(IsolateDiscoveryRestartAction());
+                  ref.redux(parentIsolateProvider).dispatch(IsolateDiscoveryRestartAction());
                 }
                 break;
               case AppLifecycleState.detached:
                 // The main isolate is only exited when all child isolates are exited.
                 // https://github.com/localsend/localsend/issues/1568
-                ref
-                    .redux(parentIsolateProvider)
-                    .dispatch(IsolateDisposeAction());
+                ref.redux(parentIsolateProvider).dispatch(IsolateDisposeAction());
                 break;
               default:
                 break;
@@ -89,7 +84,7 @@ class LocalSendApp extends StatelessWidget {
           },
           child: ShortcutWatcher(
             child: MaterialApp(
-              title: t.appName,
+              title: 'LocalSendInk',
               locale: TranslationProvider.of(context).flutterLocale,
               supportedLocales: AppLocaleUtils.supportedLocales,
               localizationsDelegates: GlobalMaterialLocalizations.delegates,
@@ -110,15 +105,11 @@ class LocalSendApp extends StatelessWidget {
                       Brightness.dark,
                       dynamicColors,
                     ),
-              themeMode: useEInkUi
-                  ? ThemeMode.light
-                  : (colorMode == ColorMode.oled ? ThemeMode.dark : themeMode),
-              builder: (context, child) =>
-                  WindowBrightnessWatcher(child: child!),
+              themeMode: useEInkUi ? ThemeMode.light : (colorMode == ColorMode.oled ? ThemeMode.dark : themeMode),
+              builder: (context, child) => WindowBrightnessWatcher(child: child!),
               navigatorKey: context.read(navigationProvider).key,
               home: RouterinoHome(
-                builder: () =>
-                    const HomePage(initialTab: HomeTab.receive, appStart: true),
+                builder: () => const HomePage(initialTab: HomeTab.receive, appStart: true),
               ),
             ),
           ),

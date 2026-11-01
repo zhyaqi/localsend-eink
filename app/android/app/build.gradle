@@ -67,7 +67,9 @@ android {
 
     buildTypes {
         release {
-            signingConfig signingConfigs.release
+            // Local e-ink builds without a release keystore still produce an
+            // installable, AOT-compiled APK signed with the debug key.
+            signingConfig rootProject.file('key.properties').exists() ? signingConfigs.release : signingConfigs.debug
         }
         debug {
             applicationIdSuffix ".debug"

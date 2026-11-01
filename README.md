@@ -24,16 +24,18 @@ LocalSend is a free, open-source app that allows you to securely share files and
 
 ## E-ink fork
 
-This fork is tuned for Android e-ink readers, with the Hanwang N10 as the primary target. The Android build uses a monochrome, high-contrast UI, removes route and decorative animations, keeps labels visible in tablet navigation, and uses larger tap targets. It is intentionally packaged as `org.localsend.localsend_eink` / **LocalSend Ink** so it can be installed alongside the upstream app.
+This fork is tuned for Android e-ink readers, with the Hanwang N10 as the primary target. The Android build uses a monochrome, high-contrast UI, removes route and decorative animations, keeps labels visible in tablet navigation, and uses larger tap targets. It is intentionally packaged as `org.localsend.localsend_eink` / **LocalSendInk** so it can be installed alongside the upstream app.
 
-Build the APK from the repository root:
+Build the optimized APK from the repository root:
 
 ```powershell
 cd app
-fvm flutter build apk --debug
+fvm flutter build apk --release --target-platform android-arm64 --split-per-abi
 ```
 
-The debug APK is written to `app/build/app/outputs/flutter-apk/app-debug.apk`.
+The arm64 release APK is written to `app/build/app/outputs/flutter-apk/app-arm64-v8a-release.apk`.
+The release build is recommended on the N10 because the debug JIT runtime has a
+significantly longer cold start.
 
 - [About](#about)
 - [Sponsors](#sponsors)

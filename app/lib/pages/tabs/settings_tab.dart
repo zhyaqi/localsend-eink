@@ -43,58 +43,77 @@ class SettingsTab extends StatelessWidget {
       provider: (ref) => settingsTabControllerProvider,
       builder: (context, vm) {
         final ref = context.ref;
+        final eInk = checkPlatform([TargetPlatform.android]);
         return ResponsiveListView(
           padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 40),
           children: [
             Padding(
               padding: const EdgeInsets.only(left: 8),
-              child: Text(t.settingsTab.title, style: Theme.of(context).textTheme.titleLarge, textAlign: TextAlign.center),
+              child: Text(
+                t.settingsTab.title,
+                style: Theme.of(context).textTheme.titleLarge,
+                textAlign: TextAlign.center,
+              ),
             ),
             const SizedBox(height: 30),
             _SettingsSection(
               title: t.settingsTab.general.title,
               children: [
-                _SettingsEntry(
-                  label: t.settingsTab.general.brightness,
-                  child: CustomDropdownButton<ThemeMode>(
-                    value: vm.settings.theme,
-                    items: vm.themeModes.map((theme) {
-                      return DropdownMenuItem(
-                        value: theme,
-                        alignment: Alignment.center,
-                        child: Text(theme.humanName),
-                      );
-                    }).toList(),
-                    onChanged: (theme) => vm.onChangeTheme(context, theme),
+                if (!eInk) ...[
+                  _SettingsEntry(
+                    label: t.settingsTab.general.brightness,
+                    child: CustomDropdownButton<ThemeMode>(
+                      value: vm.settings.theme,
+                      items: vm.themeModes.map((theme) {
+                        return DropdownMenuItem(
+                          value: theme,
+                          alignment: Alignment.center,
+                          child: Text(theme.humanName),
+                        );
+                      }).toList(),
+                      onChanged: (theme) => vm.onChangeTheme(context, theme),
+                    ),
                   ),
-                ),
-                _SettingsEntry(
-                  label: t.settingsTab.general.color,
-                  child: CustomDropdownButton<ColorMode>(
-                    value: vm.settings.colorMode,
-                    items: vm.colorModes.map((colorMode) {
-                      return DropdownMenuItem(
-                        value: colorMode,
-                        alignment: Alignment.center,
-                        child: Text(colorMode.humanName, overflow: TextOverflow.ellipsis),
-                      );
-                    }).toList(),
-                    onChanged: (colorMode) => vm.onChangeColorMode(context, colorMode),
+                  _SettingsEntry(
+                    label: t.settingsTab.general.color,
+                    child: CustomDropdownButton<ColorMode>(
+                      value: vm.settings.colorMode,
+                      items: vm.colorModes.map((colorMode) {
+                        return DropdownMenuItem(
+                          value: colorMode,
+                          alignment: Alignment.center,
+                          child: Text(
+                            colorMode.humanName,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        );
+                      }).toList(),
+                      onChanged: (colorMode) =>
+                          vm.onChangeColorMode(context, colorMode),
+                    ),
                   ),
-                ),
+                ],
                 _ButtonEntry(
                   label: t.settingsTab.general.language,
-                  buttonLabel: vm.settings.locale?.getLocaleName() ?? t.settingsTab.general.languageOptions.system,
+                  buttonLabel:
+                      vm.settings.locale?.getLocaleName() ??
+                      t.settingsTab.general.languageOptions.system,
                   onTap: () => vm.onTapLanguage(context),
                 ),
                 if (checkPlatformIsDesktop()) ...[
                   _BooleanEntry(
                     label: t.settingsTab.general.alwaysOnTop,
-                    value: checkPlatformIsNotWaylandDesktop() && vm.settings.alwaysOnTop,
-                    description: checkPlatformIsNotWaylandDesktop() ? null : t.settingsTab.general.alwaysOnTopUnavailable,
+                    value:
+                        checkPlatformIsNotWaylandDesktop() &&
+                        vm.settings.alwaysOnTop,
+                    description: checkPlatformIsNotWaylandDesktop()
+                        ? null
+                        : t.settingsTab.general.alwaysOnTopUnavailable,
                     onChanged: checkPlatformIsNotWaylandDesktop()
                         ? (b) async {
-                            await ref.notifier(settingsProvider).setAlwaysOnTop(b);
+                            await ref
+                                .notifier(settingsProvider)
+                                .setAlwaysOnTop(b);
                           }
                         : null,
                   ),
@@ -107,7 +126,9 @@ class SettingsTab extends StatelessWidget {
                           : t.settingsTab.general.saveWindowPlacement,
                       value: vm.settings.saveWindowPlacement,
                       onChanged: (b) async {
-                        await ref.notifier(settingsProvider).setSaveWindowPlacement(b);
+                        await ref
+                            .notifier(settingsProvider)
+                            .setSaveWindowPlacement(b);
                       },
                     ),
                   if (checkPlatformHasTray()) ...[
@@ -115,7 +136,9 @@ class SettingsTab extends StatelessWidget {
                       label: t.settingsTab.general.minimizeToTray,
                       value: vm.settings.minimizeToTray,
                       onChanged: (b) async {
-                        await ref.notifier(settingsProvider).setMinimizeToTray(b);
+                        await ref
+                            .notifier(settingsProvider)
+                            .setMinimizeToTray(b);
                       },
                     ),
                   ],
@@ -135,12 +158,14 @@ class SettingsTab extends StatelessWidget {
                         child: _BooleanEntry(
                           label: t.settingsTab.general.launchMinimized,
                           value: vm.autoStartLaunchHidden,
-                          onChanged: (_) => vm.onToggleAutoStartLaunchHidden(context),
+                          onChanged: (_) =>
+                              vm.onToggleAutoStartLaunchHidden(context),
                         ),
                       ),
                     ),
                   ],
-                  if (vm.advanced && checkPlatform([TargetPlatform.windows])) ...[
+                  if (vm.advanced &&
+                      checkPlatform([TargetPlatform.windows])) ...[
                     _BooleanEntry(
                       label: t.settingsTab.general.showInContextMenu,
                       value: vm.showInContextMenu,
@@ -148,13 +173,16 @@ class SettingsTab extends StatelessWidget {
                     ),
                   ],
                 ],
-                _BooleanEntry(
-                  label: t.settingsTab.general.animations,
-                  value: vm.settings.enableAnimations,
-                  onChanged: (b) async {
-                    await ref.notifier(settingsProvider).setEnableAnimations(b);
-                  },
-                ),
+                if (!eInk)
+                  _BooleanEntry(
+                    label: t.settingsTab.general.animations,
+                    value: vm.settings.enableAnimations,
+                    onChanged: (b) async {
+                      await ref
+                          .notifier(settingsProvider)
+                          .setEnableAnimations(b);
+                    },
+                  ),
               ],
             ),
             _SettingsSection(
@@ -167,7 +195,9 @@ class SettingsTab extends StatelessWidget {
                     final old = vm.settings.quickSave;
                     await ref.notifier(settingsProvider).setQuickSave(b);
                     if (b) {
-                      await ref.notifier(settingsProvider).setQuickSaveFromFavorites(false);
+                      await ref
+                          .notifier(settingsProvider)
+                          .setQuickSaveFromFavorites(false);
                     }
                     if (!old && b && context.mounted) {
                       await QuickSaveNotice.open(context);
@@ -179,7 +209,9 @@ class SettingsTab extends StatelessWidget {
                   value: vm.settings.quickSaveFromFavorites,
                   onChanged: (b) async {
                     final old = vm.settings.quickSaveFromFavorites;
-                    await ref.notifier(settingsProvider).setQuickSaveFromFavorites(b);
+                    await ref
+                        .notifier(settingsProvider)
+                        .setQuickSaveFromFavorites(b);
                     if (b) {
                       await ref.notifier(settingsProvider).setQuickSave(false);
                     }
@@ -205,13 +237,17 @@ class SettingsTab extends StatelessWidget {
                       );
 
                       if (newPin != null && newPin.isNotEmpty) {
-                        await ref.notifier(settingsProvider).setReceivePin(newPin);
+                        await ref
+                            .notifier(settingsProvider)
+                            .setReceivePin(newPin);
                       }
                     }
 
                     // The pin is enforced by the Rust server, so it needs a restart.
                     if (ref.read(serverProvider) != null) {
-                      await ref.notifier(serverProvider).restartServerFromSettings();
+                      await ref
+                          .notifier(serverProvider)
+                          .restartServerFromSettings();
                     }
                   },
                 ),
@@ -220,13 +256,23 @@ class SettingsTab extends StatelessWidget {
                     label: t.settingsTab.receive.destination,
                     child: TextButton(
                       style: TextButton.styleFrom(
-                        backgroundColor: Theme.of(context).inputDecorationTheme.fillColor,
-                        shape: RoundedRectangleBorder(borderRadius: Theme.of(context).inputDecorationTheme.borderRadius),
-                        foregroundColor: Theme.of(context).colorScheme.onSurface,
+                        backgroundColor: Theme.of(
+                          context,
+                        ).inputDecorationTheme.fillColor,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: Theme.of(
+                            context,
+                          ).inputDecorationTheme.borderRadius,
+                        ),
+                        foregroundColor: Theme.of(
+                          context,
+                        ).colorScheme.onSurface,
                       ),
                       onPressed: () async {
                         if (vm.settings.destination != null) {
-                          await ref.notifier(settingsProvider).setDestination(null);
+                          await ref
+                              .notifier(settingsProvider)
+                              .setDestination(null);
                           if (defaultTargetPlatform == TargetPlatform.macOS) {
                             await removeExistingDestinationAccess();
                           }
@@ -238,12 +284,18 @@ class SettingsTab extends StatelessWidget {
                           if (defaultTargetPlatform == TargetPlatform.macOS) {
                             await persistDestinationFolderAccess(directory);
                           }
-                          await ref.notifier(settingsProvider).setDestination(directory);
+                          await ref
+                              .notifier(settingsProvider)
+                              .setDestination(directory);
                         }
                       },
                       child: Padding(
                         padding: const EdgeInsets.symmetric(vertical: 5),
-                        child: Text(vm.settings.destination ?? t.settingsTab.receive.downloads, style: Theme.of(context).textTheme.titleMedium),
+                        child: Text(
+                          vm.settings.destination ??
+                              t.settingsTab.receive.downloads,
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
                       ),
                     ),
                   ),
@@ -274,11 +326,15 @@ class SettingsTab extends StatelessWidget {
                     label: t.settingsTab.receive.verifyChecksums,
                     value: vm.settings.verifyChecksums,
                     onChanged: (b) async {
-                      await ref.notifier(settingsProvider).setVerifyChecksums(b);
+                      await ref
+                          .notifier(settingsProvider)
+                          .setVerifyChecksums(b);
 
                       // The checksums are verified by the Rust server, so it needs a restart.
                       if (ref.read(serverProvider) != null) {
-                        await ref.notifier(serverProvider).restartServerFromSettings();
+                        await ref
+                            .notifier(serverProvider)
+                            .restartServerFromSettings();
                       }
                     },
                   ),
@@ -292,14 +348,18 @@ class SettingsTab extends StatelessWidget {
                     label: t.settingsTab.send.shareViaLinkAutoAccept,
                     value: vm.settings.shareViaLinkAutoAccept,
                     onChanged: (b) async {
-                      await ref.notifier(settingsProvider).setShareViaLinkAutoAccept(b);
+                      await ref
+                          .notifier(settingsProvider)
+                          .setShareViaLinkAutoAccept(b);
                     },
                   ),
                   _BooleanEntry(
                     label: t.settingsTab.send.createChecksums,
                     value: vm.settings.createChecksums,
                     onChanged: (b) async {
-                      await ref.notifier(settingsProvider).setCreateChecksums(b);
+                      await ref
+                          .notifier(settingsProvider)
+                          .setCreateChecksums(b);
                     },
                   ),
                 ],
@@ -320,15 +380,23 @@ class SettingsTab extends StatelessWidget {
                   firstChild: Container(),
                   secondChild: Padding(
                     padding: const EdgeInsets.only(bottom: 15),
-                    child: Text(t.settingsTab.network.needRestart, style: TextStyle(color: Theme.of(context).colorScheme.warning)),
+                    child: Text(
+                      t.settingsTab.network.needRestart,
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.warning,
+                      ),
+                    ),
                   ),
                 ),
                 _SettingsEntry(
-                  label: '${t.settingsTab.network.server}${vm.serverState == null ? ' (${t.general.offline})' : ''}',
+                  label:
+                      '${t.settingsTab.network.server}${vm.serverState == null ? ' (${t.general.offline})' : ''}',
                   child: DecoratedBox(
                     decoration: BoxDecoration(
                       color: Theme.of(context).inputDecorationTheme.fillColor,
-                      borderRadius: Theme.of(context).inputDecorationTheme.borderRadius,
+                      borderRadius: Theme.of(
+                        context,
+                      ).inputDecorationTheme.borderRadius,
                     ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -337,7 +405,12 @@ class SettingsTab extends StatelessWidget {
                           Tooltip(
                             message: t.general.start,
                             child: TextButton(
-                              style: TextButton.styleFrom(foregroundColor: Theme.of(context).colorScheme.onSurface, iconSize: 24),
+                              style: TextButton.styleFrom(
+                                foregroundColor: Theme.of(
+                                  context,
+                                ).colorScheme.onSurface,
+                                iconSize: 24,
+                              ),
                               onPressed: () => vm.onTapStartServer(context),
                               child: const Icon(Icons.play_arrow),
                             ),
@@ -346,7 +419,12 @@ class SettingsTab extends StatelessWidget {
                           Tooltip(
                             message: t.general.restart,
                             child: TextButton(
-                              style: TextButton.styleFrom(foregroundColor: Theme.of(context).colorScheme.onSurface, iconSize: 24),
+                              style: TextButton.styleFrom(
+                                foregroundColor: Theme.of(
+                                  context,
+                                ).colorScheme.onSurface,
+                                iconSize: 24,
+                              ),
                               onPressed: () => vm.onTapRestartServer(context),
                               child: const Icon(Icons.refresh),
                             ),
@@ -354,8 +432,15 @@ class SettingsTab extends StatelessWidget {
                         Tooltip(
                           message: t.general.stop,
                           child: TextButton(
-                            style: TextButton.styleFrom(foregroundColor: Theme.of(context).colorScheme.onSurface, iconSize: 24),
-                            onPressed: vm.serverState == null ? null : vm.onTapStopServer,
+                            style: TextButton.styleFrom(
+                              foregroundColor: Theme.of(
+                                context,
+                              ).colorScheme.onSurface,
+                              iconSize: 24,
+                            ),
+                            onPressed: vm.serverState == null
+                                ? null
+                                : vm.onTapStopServer,
                             child: const Icon(Icons.stop),
                           ),
                         ),
@@ -391,11 +476,14 @@ class SettingsTab extends StatelessWidget {
                           child: IconButton(
                             onPressed: () async {
                               final systemName = await getDeviceName();
-                              if (systemName == null || !dialogContext.mounted) {
+                              if (systemName == null ||
+                                  !dialogContext.mounted) {
                                 return;
                               }
 
-                              final isDialogOpen = ModalRoute.of(dialogContext)?.isCurrent ?? false;
+                              final isDialogOpen =
+                                  ModalRoute.of(dialogContext)?.isCurrent ??
+                                  false;
                               if (!isDialogOpen) {
                                 return;
                               }
@@ -422,7 +510,9 @@ class SettingsTab extends StatelessWidget {
                         );
                       }).toList(),
                       onChanged: (type) async {
-                        await ref.notifier(settingsProvider).setDeviceType(type);
+                        await ref
+                            .notifier(settingsProvider)
+                            .setDeviceType(type);
                       },
                     ),
                   ),
@@ -454,7 +544,8 @@ class SettingsTab extends StatelessWidget {
                 if (vm.advanced)
                   _ButtonEntry(
                     label: t.settingsTab.network.network,
-                    buttonLabel: switch (vm.settings.networkWhitelist != null || vm.settings.networkBlacklist != null) {
+                    buttonLabel: switch (vm.settings.networkWhitelist != null ||
+                        vm.settings.networkBlacklist != null) {
                       true => t.settingsTab.network.networkOptions.filtered,
                       false => t.settingsTab.network.networkOptions.all,
                     },
@@ -471,7 +562,9 @@ class SettingsTab extends StatelessWidget {
                       onChanged: (s) async {
                         final timeout = int.tryParse(s);
                         if (timeout != null) {
-                          await ref.notifier(settingsProvider).setDiscoveryTimeout(timeout);
+                          await ref
+                              .notifier(settingsProvider)
+                              .setDiscoveryTimeout(timeout);
                         }
                       },
                     ),
@@ -495,32 +588,43 @@ class SettingsTab extends StatelessWidget {
                       name: t.settingsTab.network.multicastGroup,
                       controller: vm.multicastController,
                       onChanged: (s) async {
-                        await ref.notifier(settingsProvider).setMulticastGroup(s);
+                        await ref
+                            .notifier(settingsProvider)
+                            .setMulticastGroup(s);
                       },
                     ),
                   ),
                 AnimatedCrossFade(
-                  crossFadeState: vm.settings.port != defaultPort ? CrossFadeState.showSecond : CrossFadeState.showFirst,
+                  crossFadeState: vm.settings.port != defaultPort
+                      ? CrossFadeState.showSecond
+                      : CrossFadeState.showFirst,
                   duration: const Duration(milliseconds: 200),
                   alignment: Alignment.topLeft,
                   firstChild: Container(),
                   secondChild: Padding(
                     padding: const EdgeInsets.only(bottom: 15),
                     child: Text(
-                      t.settingsTab.network.portWarning(defaultPort: defaultPort),
+                      t.settingsTab.network.portWarning(
+                        defaultPort: defaultPort,
+                      ),
                       style: const TextStyle(color: Colors.grey),
                     ),
                   ),
                 ),
                 AnimatedCrossFade(
-                  crossFadeState: vm.settings.multicastGroup != defaultMulticastGroup ? CrossFadeState.showSecond : CrossFadeState.showFirst,
+                  crossFadeState:
+                      vm.settings.multicastGroup != defaultMulticastGroup
+                      ? CrossFadeState.showSecond
+                      : CrossFadeState.showFirst,
                   duration: const Duration(milliseconds: 200),
                   alignment: Alignment.topLeft,
                   firstChild: Container(),
                   secondChild: Padding(
                     padding: const EdgeInsets.only(bottom: 15),
                     child: Text(
-                      t.settingsTab.network.multicastGroupWarning(defaultMulticast: defaultMulticastGroup),
+                      t.settingsTab.network.multicastGroupWarning(
+                        defaultMulticast: defaultMulticastGroup,
+                      ),
                       style: const TextStyle(color: Colors.grey),
                     ),
                   ),
@@ -561,7 +665,9 @@ class SettingsTab extends StatelessWidget {
                     buttonLabel: t.general.open,
                     onTap: () async {
                       await launchUrl(
-                        Uri.parse('https://www.apple.com/legal/internet-services/itunes/dev/stdeula/'),
+                        Uri.parse(
+                          'https://www.apple.com/legal/internet-services/itunes/dev/stdeula/',
+                        ),
                         mode: LaunchMode.externalApplication,
                       );
                     },
@@ -577,7 +683,9 @@ class SettingsTab extends StatelessWidget {
                   labelFirst: true,
                   onChanged: (b) async {
                     vm.onTapAdvanced(b == true);
-                    await ref.notifier(settingsProvider).setAdvancedSettingsEnabled(b == true);
+                    await ref
+                        .notifier(settingsProvider)
+                        .setAdvancedSettingsEnabled(b == true);
                   },
                 ),
                 const SizedBox(width: 10),
@@ -624,10 +732,17 @@ class _SettingsEntry extends StatelessWidget {
   final Widget child;
   final String? description;
 
-  const _SettingsEntry({required this.label, required this.child, this.description});
+  const _SettingsEntry({
+    required this.label,
+    required this.child,
+    this.description,
+  });
 
   @override
   Widget build(BuildContext context) {
+    final controlWidth = checkPlatform([TargetPlatform.android])
+        ? 190.0
+        : 150.0;
     return Padding(
       padding: const EdgeInsets.only(bottom: 15),
       child: Row(
@@ -640,16 +755,15 @@ class _SettingsEntry extends StatelessWidget {
                 if (description != null)
                   Text(
                     description!,
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
                   ),
               ],
             ),
           ),
           const SizedBox(width: 10),
-          SizedBox(
-            width: 150,
-            child: child,
-          ),
+          SizedBox(width: controlWidth, child: child),
         ],
       ),
     );
@@ -723,7 +837,9 @@ class _ButtonEntry extends StatelessWidget {
       child: TextButton(
         style: TextButton.styleFrom(
           backgroundColor: Theme.of(context).inputDecorationTheme.fillColor,
-          shape: RoundedRectangleBorder(borderRadius: Theme.of(context).inputDecorationTheme.borderRadius),
+          shape: RoundedRectangleBorder(
+            borderRadius: Theme.of(context).inputDecorationTheme.borderRadius,
+          ),
           foregroundColor: Theme.of(context).colorScheme.onSurface,
         ),
         onPressed: onTap,

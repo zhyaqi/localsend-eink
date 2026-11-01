@@ -11,14 +11,14 @@ import 'package:localsend_app/pages/tabs/send_tab.dart';
 import 'package:localsend_app/pages/tabs/settings_tab.dart';
 import 'package:localsend_app/provider/selection/selected_sending_files_provider.dart';
 import 'package:localsend_app/util/native/cross_file_converters.dart';
+import 'package:localsend_app/util/native/platform_check.dart';
 import 'package:localsend_app/widget/responsive_builder.dart';
 import 'package:refena_flutter/refena_flutter.dart';
 
 enum HomeTab {
   receive(Icons.wifi),
   send(Icons.send),
-  settings(Icons.settings)
-  ;
+  settings(Icons.settings);
 
   const HomeTab(this.icon);
 
@@ -43,11 +43,7 @@ class HomePage extends StatefulWidget {
   /// because the first init clears the cache
   final bool appStart;
 
-  const HomePage({
-    required this.initialTab,
-    required this.appStart,
-    super.key,
-  });
+  const HomePage({required this.initialTab, required this.appStart, super.key});
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -61,7 +57,9 @@ class _HomePageState extends State<HomePage> with Refena {
     super.initState();
 
     ensureRef((ref) async {
-      ref.redux(homePageControllerProvider).dispatch(ChangeTabAction(widget.initialTab));
+      ref
+          .redux(homePageControllerProvider)
+          .dispatch(ChangeTabAction(widget.initialTab));
       await postInit(context, ref, widget.appStart);
     });
   }
@@ -84,11 +82,17 @@ class _HomePageState extends State<HomePage> with Refena {
       },
       onDragDone: (event) async {
         // the drop may contain a mix of files and directories
-        final droppedDirectories = event.files.where((file) => Directory(file.path).existsSync()).toList();
-        final droppedFiles = event.files.where((file) => !Directory(file.path).existsSync()).toList();
+        final droppedDirectories = event.files
+            .where((file) => Directory(file.path).existsSync())
+            .toList();
+        final droppedFiles = event.files
+            .where((file) => !Directory(file.path).existsSync())
+            .toList();
 
         for (final directory in droppedDirectories) {
-          await ref.redux(selectedSendingFilesProvider).dispatchAsync(AddDirectoryAction(directory.path));
+          await ref
+              .redux(selectedSendingFilesProvider)
+              .dispatchAsync(AddDirectoryAction(directory.path));
         }
 
         if (droppedFiles.isNotEmpty) {
@@ -105,34 +109,70 @@ class _HomePageState extends State<HomePage> with Refena {
       },
       child: ResponsiveBuilder(
         builder: (sizingInformation) {
+          final eInk = checkPlatform([TargetPlatform.android]);
           return Scaffold(
             body: Row(
               children: [
                 if (!sizingInformation.isMobile)
-                  NavigationRail(
-                    selectedIndex: vm.currentTab.index,
-                    onDestinationSelected: (index) => vm.changeTab(HomeTab.values[index]),
-                    extended: sizingInformation.isDesktop,
-                    backgroundColor: Theme.of(context).cardColorWithElevation,
-                    leading: sizingInformation.isDesktop
-                        ? const Column(
-                            children: [
-                              SizedBox(height: 20),
-                              Text(
-                                'LocalSend',
-                                style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
-                                textAlign: TextAlign.center,
+                  DecoratedBox(
+                    decoration: eInk
+                        ? BoxDecoration(
+                            border: Border(
+                              right: BorderSide(
+                                color: Theme.of(context).colorScheme.outline,
+                                width: 1.4,
                               ),
-                              SizedBox(height: 20),
-                            ],
+                            ),
                           )
-                        : null,
-                    destinations: HomeTab.values.map((tab) {
-                      return NavigationRailDestination(
-                        icon: Icon(tab.icon),
-                        label: Text(tab.label),
-                      );
-                    }).toList(),
+                        : const BoxDecoration(),
+                    child: NavigationRail(
+                      selectedIndex: vm.currentTab.index,
+                      onDestinationSelected: (index) =>
+                          vm.changeTab(HomeTab.values[index]),
+                      extended: sizingInformation.isDesktop,
+                      labelType: eInk && !sizingInformation.isDesktop
+                          ? NavigationRailLabelType.all
+                          : null,
+                      minWidth: eInk ? 96 : null,
+                      minExtendedWidth: eInk ? 208 : null,
+                      groupAlignment: eInk ? -0.72 : null,
+                      backgroundColor: eInk
+                          ? Theme.of(context).colorScheme.surface
+                          : Theme.of(context).cardColorWithElevation,
+                      leading: sizingInformation.isDesktop
+                          ? Column(
+                              children: [
+                                const SizedBox(height: 24),
+                                const Icon(Icons.swap_horiz_rounded, size: 44),
+                                const SizedBox(height: 8),
+                                const Text(
+                                  'LocalSend',
+                                  style: TextStyle(
+                                    fontSize: 25,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                                if (eInk)
+                                  const Text(
+                                    'INK',
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      letterSpacing: 3,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                const SizedBox(height: 28),
+                              ],
+                            )
+                          : null,
+                      destinations: HomeTab.values.map((tab) {
+                        return NavigationRailDestination(
+                          icon: Icon(tab.icon),
+                          label: Text(tab.label),
+                        );
+                      }).toList(),
+                    ),
                   ),
                 Expanded(
                   child: SafeArea(
@@ -159,7 +199,10 @@ class _HomePageState extends State<HomePage> with Refena {
                               children: [
                                 const Icon(Icons.file_download, size: 128),
                                 const SizedBox(height: 30),
-                                Text(t.sendTab.placeItems, style: Theme.of(context).textTheme.titleLarge),
+                                Text(
+                                  t.sendTab.placeItems,
+                                  style: Theme.of(context).textTheme.titleLarge,
+                                ),
                               ],
                             ),
                           ),
@@ -170,12 +213,26 @@ class _HomePageState extends State<HomePage> with Refena {
               ],
             ),
             bottomNavigationBar: sizingInformation.isMobile
-                ? NavigationBar(
-                    selectedIndex: vm.currentTab.index,
-                    onDestinationSelected: (index) => vm.changeTab(HomeTab.values[index]),
-                    destinations: HomeTab.values.map((tab) {
-                      return NavigationDestination(icon: Icon(tab.icon), label: tab.label);
-                    }).toList(),
+                ? DecoratedBox(
+                    decoration: BoxDecoration(
+                      border: Border(
+                        top: BorderSide(
+                          color: Theme.of(context).colorScheme.outline,
+                          width: 1.4,
+                        ),
+                      ),
+                    ),
+                    child: NavigationBar(
+                      selectedIndex: vm.currentTab.index,
+                      onDestinationSelected: (index) =>
+                          vm.changeTab(HomeTab.values[index]),
+                      destinations: HomeTab.values.map((tab) {
+                        return NavigationDestination(
+                          icon: Icon(tab.icon),
+                          label: tab.label,
+                        );
+                      }).toList(),
+                    ),
                   )
                 : null,
           );

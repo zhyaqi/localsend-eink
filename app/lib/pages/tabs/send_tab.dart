@@ -45,10 +45,15 @@ class SendTab extends StatelessWidget {
   Widget build(BuildContext context) {
     return ViewModelBuilder(
       provider: (ref) => sendTabVmProvider,
-      init: (context) async => context.global.dispatchAsync(SendTabInitAction(context)), // ignore: discarded_futures
+      init: (context) async => context.global.dispatchAsync(
+        SendTabInitAction(context),
+      ), // ignore: discarded_futures
       builder: (context, vm) {
-        final sizingInformation = SizingInformation(MediaQuery.sizeOf(context).width);
-        final buttonWidth = sizingInformation.isDesktop ? BigButton.desktopWidth : BigButton.mobileWidth;
+        final sizingInformation = SizingInformation(
+          MediaQuery.sizeOf(context).width,
+        );
+        final eInk = checkPlatform([TargetPlatform.android]);
+        final buttonWidth = eInk ? 132.0 : (sizingInformation.isDesktop ? BigButton.desktopWidth : BigButton.mobileWidth);
         final ref = context.ref;
         return ResponsiveListView(
           padding: EdgeInsets.zero,
@@ -56,7 +61,9 @@ class SendTab extends StatelessWidget {
             const SizedBox(height: 20),
             if (vm.selectedFiles.isEmpty) ...[
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: _horizontalPadding),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: _horizontalPadding,
+                ),
                 child: Text(
                   t.sendTab.selection.title,
                   style: Theme.of(context).textTheme.titleMedium,
@@ -73,19 +80,24 @@ class SendTab extends StatelessWidget {
                     label: option.label,
                     filled: false,
                     onTap: () async => ref.global.dispatchAsync(
-                      PickFileAction(
-                        option: option,
-                        context: context,
-                      ),
+                      PickFileAction(option: option, context: context),
                     ),
                   );
                 }).toList(),
               ),
             ] else ...[
               Card(
-                margin: const EdgeInsets.only(bottom: 10, left: _horizontalPadding, right: _horizontalPadding),
+                margin: const EdgeInsets.only(
+                  bottom: 10,
+                  left: _horizontalPadding,
+                  right: _horizontalPadding,
+                ),
                 child: Padding(
-                  padding: const EdgeInsetsDirectional.only(start: 15, top: 5, bottom: 15),
+                  padding: const EdgeInsetsDirectional.only(
+                    start: 15,
+                    top: 5,
+                    bottom: 15,
+                  ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -98,14 +110,25 @@ class SendTab extends StatelessWidget {
                           const Spacer(),
                           CustomIconButton(
                             onPressed: () => ref.redux(selectedSendingFilesProvider).dispatch(ClearSelectionAction()),
-                            child: Icon(Icons.close, color: Theme.of(context).colorScheme.secondary),
+                            child: Icon(
+                              Icons.close,
+                              color: Theme.of(context).colorScheme.secondary,
+                            ),
                           ),
                           const SizedBox(width: 5),
                         ],
                       ),
                       const SizedBox(height: 5),
-                      Text(t.sendTab.selection.files(files: vm.selectedFiles.length)),
-                      Text(t.sendTab.selection.size(size: vm.selectedFiles.fold(0, (prev, curr) => prev + curr.size).asReadableFileSize)),
+                      Text(
+                        t.sendTab.selection.files(
+                          files: vm.selectedFiles.length,
+                        ),
+                      ),
+                      Text(
+                        t.sendTab.selection.size(
+                          size: vm.selectedFiles.fold(0, (prev, curr) => prev + curr.size).asReadableFileSize,
+                        ),
+                      ),
                       const SizedBox(height: 10),
                       SizedBox(
                         height: defaultThumbnailSize,
@@ -127,18 +150,26 @@ class SendTab extends StatelessWidget {
                         children: [
                           TextButton(
                             style: TextButton.styleFrom(
-                              foregroundColor: Theme.of(context).colorScheme.onSurface,
+                              foregroundColor: Theme.of(
+                                context,
+                              ).colorScheme.onSurface,
                             ),
                             onPressed: () async {
-                              await context.push(() => const SelectedFilesPage());
+                              await context.push(
+                                () => const SelectedFilesPage(),
+                              );
                             },
                             child: Text(t.general.edit),
                           ),
                           const SizedBox(width: 15),
                           ElevatedButton.icon(
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Theme.of(context).colorScheme.primary,
-                              foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                              backgroundColor: Theme.of(
+                                context,
+                              ).colorScheme.primary,
+                              foregroundColor: Theme.of(
+                                context,
+                              ).colorScheme.onPrimary,
                             ),
                             onPressed: () async {
                               if (pickerOptions.length == 1) {
@@ -167,41 +198,77 @@ class SendTab extends StatelessWidget {
                 ),
               ),
             ],
-            Row(
-              children: [
-                const SizedBox(width: _horizontalPadding),
-                Flexible(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 10),
-                    child: Text(t.sendTab.nearbyDevices, style: Theme.of(context).textTheme.titleMedium),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                _horizontalPadding,
+                10,
+                _horizontalPadding,
+                6,
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      t.sendTab.nearbyDevices,
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
                   ),
-                ),
-                const SizedBox(width: 10),
-                _ScanButton(
-                  ips: vm.localIps,
-                ),
-                Tooltip(
-                  message: t.sendTab.manualSending,
-                  child: CustomIconButton(
-                    onPressed: () async => vm.onTapAddress(context),
-                    child: const Icon(Icons.ads_click),
-                  ),
-                ),
-                Tooltip(
-                  message: t.dialogs.favoriteDialog.title,
-                  child: CustomIconButton(
-                    onPressed: () async => await vm.onTapFavorite(context),
-                    child: const Icon(Icons.favorite),
-                  ),
-                ),
-                _SendModeButton(
-                  onSelect: (mode) async => vm.onTapSendMode(context, mode),
-                ),
-              ],
+                  if (!eInk) ...[
+                    _ScanButton(ips: vm.localIps),
+                    Tooltip(
+                      message: t.sendTab.manualSending,
+                      child: CustomIconButton(
+                        onPressed: () async => vm.onTapAddress(context),
+                        child: const Icon(Icons.ads_click),
+                      ),
+                    ),
+                    Tooltip(
+                      message: t.dialogs.favoriteDialog.title,
+                      child: CustomIconButton(
+                        onPressed: () async => await vm.onTapFavorite(context),
+                        child: const Icon(Icons.favorite),
+                      ),
+                    ),
+                    _SendModeButton(
+                      onSelect: (mode) async => vm.onTapSendMode(context, mode),
+                    ),
+                  ],
+                ],
+              ),
             ),
+            if (eInk)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  _horizontalPadding,
+                  4,
+                  _horizontalPadding,
+                  12,
+                ),
+                child: Wrap(
+                  spacing: 10,
+                  runSpacing: 10,
+                  children: [
+                    _ScanButton(ips: vm.localIps, showLabel: true),
+                    OutlinedButton.icon(
+                      onPressed: () async => vm.onTapAddress(context),
+                      icon: const Icon(Icons.ads_click),
+                      label: Text(t.sendTab.manualSending),
+                    ),
+                    OutlinedButton.icon(
+                      onPressed: () async => await vm.onTapFavorite(context),
+                      icon: const Icon(Icons.favorite_border),
+                      label: Text(t.dialogs.favoriteDialog.title),
+                    ),
+                  ],
+                ),
+              ),
             if (vm.nearbyDevices.isEmpty)
               const Padding(
-                padding: EdgeInsets.only(bottom: 10, left: _horizontalPadding, right: _horizontalPadding),
+                padding: EdgeInsets.only(
+                  bottom: 10,
+                  left: _horizontalPadding,
+                  right: _horizontalPadding,
+                ),
                 child: Opacity(
                   opacity: 0.3,
                   child: DevicePlaceholderListTile(),
@@ -210,7 +277,11 @@ class SendTab extends StatelessWidget {
             ...vm.nearbyDevices.map((device) {
               final favoriteEntry = vm.favoriteDevices.findDevice(device);
               return Padding(
-                padding: const EdgeInsets.only(bottom: 10, left: _horizontalPadding, right: _horizontalPadding),
+                padding: const EdgeInsets.only(
+                  bottom: 10,
+                  left: _horizontalPadding,
+                  right: _horizontalPadding,
+                ),
                 child: Hero(
                   tag: 'device-${device.ip}',
                   child: vm.sendMode == SendMode.multiple
@@ -224,7 +295,9 @@ class SendTab extends StatelessWidget {
                           device: device,
                           isFavorite: favoriteEntry != null,
                           nameOverride: favoriteEntry?.alias,
-                          onDetailsTap: () async => await context.push(() => DeviceDetailsPage(device: device)),
+                          onDetailsTap: () async => await context.push(
+                            () => DeviceDetailsPage(device: device),
+                          ),
                           onTap: () async => await vm.onTapDevice(context, device),
                         ),
                 ),
@@ -241,7 +314,9 @@ class SendTab extends StatelessWidget {
             ),
             const SizedBox(height: 20),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: _horizontalPadding),
+              padding: const EdgeInsets.symmetric(
+                horizontal: _horizontalPadding,
+              ),
               child: Consumer(
                 builder: (context, ref) {
                   final animations = ref.watch(animationProvider);
@@ -296,9 +371,7 @@ class _CircularPopupButton<T> extends StatelessWidget {
       child: Material(
         type: MaterialType.transparency,
         child: DividerTheme(
-          data: DividerThemeData(
-            color: Theme.of(context).brightness == Brightness.light ? Colors.teal.shade100 : Colors.grey.shade700,
-          ),
+          data: DividerThemeData(color: Theme.of(context).colorScheme.outline),
           child: PopupMenuButton(
             offset: const Offset(0, 40),
             onSelected: onSelected,
@@ -315,20 +388,41 @@ class _CircularPopupButton<T> extends StatelessWidget {
 /// The scan button that uses [_CircularPopupButton].
 class _ScanButton extends StatelessWidget {
   final List<String> ips;
+  final bool showLabel;
 
-  const _ScanButton({
-    required this.ips,
-  });
+  const _ScanButton({required this.ips, this.showLabel = false});
 
   @override
   Widget build(BuildContext context) {
-    final (scanningFavorites, scanningIps) = context.ref.watch(nearbyDevicesProvider.select((s) => (s.runningFavoriteScan, s.runningIps)));
+    final (scanningFavorites, scanningIps) = context.ref.watch(
+      nearbyDevicesProvider.select(
+        (s) => (s.runningFavoriteScan, s.runningIps),
+      ),
+    );
     final animations = context.ref.watch(animationProvider);
 
     final spinning = (scanningFavorites || scanningIps.isNotEmpty) && animations;
     final iconColor = !animations && scanningIps.isNotEmpty ? Theme.of(context).colorScheme.warning : null;
 
     if (ips.length <= StartSmartScan.maxInterfaces) {
+      Future<void> scan() async {
+        context.redux(nearbyDevicesProvider).dispatch(ClearFoundDevicesAction());
+        await context.global.dispatchAsync(StartSmartScan());
+      }
+
+      if (showLabel) {
+        return OutlinedButton.icon(
+          onPressed: scan,
+          icon: RotatingWidget(
+            duration: const Duration(seconds: 2),
+            spinning: spinning,
+            reverse: true,
+            child: Icon(Icons.sync, color: iconColor),
+          ),
+          label: Text(t.sendTab.scan),
+        );
+      }
+
       return Tooltip(
         message: t.sendTab.scan,
         child: RotatingWidget(
@@ -336,10 +430,7 @@ class _ScanButton extends StatelessWidget {
           spinning: spinning,
           reverse: true,
           child: CustomIconButton(
-            onPressed: () async {
-              context.redux(nearbyDevicesProvider).dispatch(ClearFoundDevicesAction());
-              await context.global.dispatchAsync(StartSmartScan());
-            },
+            onPressed: scan,
             child: Icon(Icons.sync, color: iconColor),
           ),
         ),
@@ -350,7 +441,9 @@ class _ScanButton extends StatelessWidget {
       tooltip: t.sendTab.scan,
       onSelected: (ip) async {
         context.redux(nearbyDevicesProvider).dispatch(ClearFoundDevicesAction());
-        await context.global.dispatchAsync(StartLegacySubnetScan(subnets: [ip]));
+        await context.global.dispatchAsync(
+          StartLegacySubnetScan(subnets: [ip]),
+        );
       },
       itemBuilder: (_) {
         return [
@@ -391,7 +484,9 @@ class _RotatingSyncIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scanningIps = context.ref.watch(nearbyDevicesProvider.select((s) => s.runningIps));
+    final scanningIps = context.ref.watch(
+      nearbyDevicesProvider.select((s) => s.runningIps),
+    );
     return RotatingWidget(
       duration: const Duration(seconds: 2),
       spinning: scanningIps.contains(ip),
@@ -422,7 +517,10 @@ class _SendModeButton extends StatelessWidget {
             onSelect(SendMode.link);
             break;
           case -1:
-            await showDialog(context: context, builder: (_) => const SendModeHelpDialog());
+            await showDialog(
+              context: context,
+              builder: (_) => const SendModeHelpDialog(),
+            );
             break;
         }
       },
@@ -434,7 +532,9 @@ class _SendModeButton extends StatelessWidget {
             children: [
               Consumer(
                 builder: (context, ref) {
-                  final sendMode = ref.watch(settingsProvider.select((s) => s.sendMode));
+                  final sendMode = ref.watch(
+                    settingsProvider.select((s) => s.sendMode),
+                  );
                   return Visibility(
                     visible: sendMode == SendMode.single,
                     maintainSize: true,
@@ -456,7 +556,9 @@ class _SendModeButton extends StatelessWidget {
             children: [
               Consumer(
                 builder: (context, ref) {
-                  final sendMode = ref.watch(settingsProvider.select((s) => s.sendMode));
+                  final sendMode = ref.watch(
+                    settingsProvider.select((s) => s.sendMode),
+                  );
                   return Visibility(
                     visible: sendMode == SendMode.multiple,
                     maintainSize: true,
@@ -537,12 +639,25 @@ class _MultiSendDeviceListTile extends StatelessWidget {
       final transferNotifier = ref.watch(fileTransferProvider);
       final currBytes = files.fold<int>(
         0,
-        (prev, curr) => prev + ((transferNotifier.getProgress(sessionId: session.sessionId, fileId: curr.file.id) * curr.file.size).round()),
+        (prev, curr) =>
+            prev +
+            ((transferNotifier.getProgress(
+                      sessionId: session.sessionId,
+                      fileId: curr.file.id,
+                    ) *
+                    curr.file.size)
+                .round()),
       );
-      final totalBytes = files.fold<int>(0, (prev, curr) => prev + curr.file.size);
+      final totalBytes = files.fold<int>(
+        0,
+        (prev, curr) => prev + curr.file.size,
+      );
       progress = totalBytes == 0 ? 0 : currBytes / totalBytes;
       info = session.hashedFileCount < session.files.length
-          ? t.sendPage.calculatingChecksum(curr: session.hashedFileCount, n: session.files.length)
+          ? t.sendPage.calculatingChecksum(
+              curr: session.hashedFileCount,
+              n: session.files.length,
+            )
           : session.status.humanString;
     } else {
       progress = null;

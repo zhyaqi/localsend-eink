@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:localsend_app/config/theme.dart';
 import 'package:localsend_app/gen/strings.g.dart';
 import 'package:localsend_app/pages/receive_page.dart';
 import 'package:localsend_app/provider/network/server/server_provider.dart';
@@ -24,16 +25,12 @@ class ReceiveOptionsPage extends StatelessWidget {
     final ref = context.ref;
     final receiveSession = ref.watch(serverProvider.select((s) => s?.session));
     if (receiveSession == null) {
-      return Scaffold(
-        body: Container(),
-      );
+      return Scaffold(body: Container());
     }
     final selectState = ref.watch(selectedReceivingFilesProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(t.receiveOptionsPage.title),
-      ),
+      appBar: AppBar(title: Text(t.receiveOptionsPage.title)),
       body: ResponsiveListView.builder(
         padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 20),
         itemCount: vm.files.length + 1,
@@ -45,7 +42,10 @@ class ReceiveOptionsPage extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    Text(t.receiveOptionsPage.destination, style: Theme.of(context).textTheme.titleLarge),
+                    Text(
+                      t.receiveOptionsPage.destination,
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
                     if (checkPlatformWithFileSystem())
                       Padding(
                         padding: const EdgeInsets.only(left: 10),
@@ -62,13 +62,18 @@ class ReceiveOptionsPage extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 5),
-                Text(checkPlatformWithFileSystem() ? receiveSession.destinationDirectory : t.receiveOptionsPage.appDirectory),
+                Text(
+                  checkPlatformWithFileSystem() ? receiveSession.destinationDirectory : t.receiveOptionsPage.appDirectory,
+                ),
                 if (checkPlatformWithGallery())
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const SizedBox(height: 20),
-                      Text(t.receiveOptionsPage.saveToGallery, style: Theme.of(context).textTheme.titleLarge),
+                      Text(
+                        t.receiveOptionsPage.saveToGallery,
+                        style: Theme.of(context).textTheme.titleLarge,
+                      ),
                       const SizedBox(height: 10),
                       Row(
                         children: [
@@ -80,10 +85,16 @@ class ReceiveOptionsPage extends StatelessWidget {
                                 value: b,
                                 alignment: Alignment.center,
                                 child: ConstrainedBox(
-                                  constraints: const BoxConstraints(minWidth: 80),
+                                  constraints: const BoxConstraints(
+                                    minWidth: 80,
+                                  ),
                                   child: Padding(
-                                    padding: const EdgeInsets.symmetric(horizontal: 10),
-                                    child: Text(b ? t.general.on : t.general.off),
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 10,
+                                    ),
+                                    child: Text(
+                                      b ? t.general.on : t.general.off,
+                                    ),
                                   ),
                                 ),
                               );
@@ -93,7 +104,10 @@ class ReceiveOptionsPage extends StatelessWidget {
                           if (receiveSession.containsDirectories && !receiveSession.saveToGallery) ...[
                             const SizedBox(width: 10),
                             Expanded(
-                              child: Text(t.receiveOptionsPage.saveToGalleryOff, style: const TextStyle(color: Colors.grey)),
+                              child: Text(
+                                t.receiveOptionsPage.saveToGalleryOff,
+                                style: const TextStyle(color: Colors.grey),
+                              ),
                             ),
                           ],
                         ],
@@ -103,13 +117,19 @@ class ReceiveOptionsPage extends StatelessWidget {
                 const SizedBox(height: 20),
                 Row(
                   children: [
-                    Text(t.general.files, style: Theme.of(context).textTheme.titleLarge),
+                    Text(
+                      t.general.files,
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
                     const SizedBox(width: 10),
                     Tooltip(
                       message: t.dialogs.quickActions.title,
                       child: CustomIconButton(
                         onPressed: () async {
-                          await showDialog(context: context, builder: (_) => const QuickActionsDialog());
+                          await showDialog(
+                            context: context,
+                            builder: (_) => const QuickActionsDialog(),
+                          );
                         },
                         child: const Icon(Icons.tips_and_updates),
                       ),
@@ -153,7 +173,11 @@ class ReceiveOptionsPage extends StatelessWidget {
                         style: TextStyle(
                           color: !selectState.containsKey(file.id)
                               ? Colors.grey
-                              : (selectState[file.id] == file.fileName ? Theme.of(context).colorScheme.onSecondaryContainer : Colors.orange),
+                              : (selectState[file.id] == file.fileName
+                                    ? Theme.of(
+                                        context,
+                                      ).colorScheme.onSecondaryContainer
+                                    : Theme.of(context).colorScheme.warning),
                         ),
                       ),
                     ],

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:localsend_app/config/theme.dart';
+import 'package:localsend_app/util/native/platform_check.dart';
 import 'package:localsend_app/widget/responsive_builder.dart';
 
 class BigButton extends StatelessWidget {
@@ -23,29 +24,43 @@ class BigButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final sizingInformation = SizingInformation(MediaQuery.sizeOf(context).width);
-    final buttonWidth = width ?? (sizingInformation.isDesktop ? desktopWidth : mobileWidth);
+    final sizingInformation = SizingInformation(
+      MediaQuery.sizeOf(context).width,
+    );
+    final eInk = checkPlatform([TargetPlatform.android]);
+    final buttonWidth = width ?? (eInk ? 132.0 : (sizingInformation.isDesktop ? desktopWidth : mobileWidth));
     return SizedBox(
       width: buttonWidth,
-      height: 65.0,
+      height: eInk ? 98.0 : 65.0,
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
-          backgroundColor: filled ? colorScheme.primary : colorScheme.secondaryContainerIfDark,
-          foregroundColor: filled ? colorScheme.onPrimary : colorScheme.onSecondaryContainerIfDark,
+          backgroundColor: filled ? colorScheme.primary : (eInk ? colorScheme.surface : colorScheme.secondaryContainerIfDark),
+          foregroundColor: filled ? colorScheme.onPrimary : (eInk ? colorScheme.onSurface : colorScheme.onSecondaryContainerIfDark),
+          side: eInk ? BorderSide(color: colorScheme.outline, width: 1.4) : null,
+          elevation: 0,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(eInk ? 4 : 10),
           ),
-          padding: const EdgeInsets.only(left: 2, right: 2, top: 10, bottom: 8),
+          padding: EdgeInsets.only(
+            left: 4,
+            right: 4,
+            top: eInk ? 12 : 10,
+            bottom: eInk ? 12 : 8,
+          ),
         ),
         onPressed: onTap,
         child: Column(
           mainAxisSize: MainAxisSize.max,
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Icon(icon),
+            Icon(icon, size: eInk ? 30 : 24),
             FittedBox(
               alignment: Alignment.bottomCenter,
-              child: Text(label, maxLines: 1),
+              child: Text(
+                label,
+                maxLines: 1,
+                style: eInk ? const TextStyle(fontSize: 16, fontWeight: FontWeight.w600) : null,
+              ),
             ),
           ],
         ),

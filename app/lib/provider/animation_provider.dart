@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:localsend_app/provider/settings_provider.dart';
 import 'package:localsend_app/util/native/platform_check.dart';
@@ -13,8 +14,14 @@ final sleepProvider = StateProvider<bool>((ref) {
 /// If false, then animations are disabled.
 final animationProvider = ViewProvider<bool>((ref) {
   final sleeping = ref.watch(sleepProvider);
-  final enableAnimations = ref.watch(settingsProvider.select((s) => s.enableAnimations));
-  final animations = enableAnimations && !sleeping;
+  final enableAnimations = ref.watch(
+    settingsProvider.select((s) => s.enableAnimations),
+  );
+  // Intermittent e-ink refreshes create a slow, high-ghosting experience. The
+  // Android build is targeted at an e-ink reader, so keep motion off regardless
+  // of a setting persisted from another platform.
+  final animations =
+      enableAnimations && !sleeping && !checkPlatform([TargetPlatform.android]);
 
   timeDilation = animations ? 1.0 : 0.00001;
   if (animations) {
